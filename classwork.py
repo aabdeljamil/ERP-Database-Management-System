@@ -34,6 +34,7 @@ class Connection:
             return
     
     def loginOut(self,conn):
+        print(conn)
         myCursor = conn.cursor()
         outdate = datetime.datetime.now().date()
         outtime = datetime.datetime.now().time()
@@ -143,11 +144,11 @@ class Connection:
             if duplicateName:
                 ques = input("Customer with that name already exists. Is this a different customer with the same name? (Y/N)")
                 if ques == "Y":
-                    cId = getMaxID(conn,'customer','customerid')+1
+                    cId = self.getMaxID(conn,'customer','customerid')+1
                     myCursor.execute("Insert into Customer (customerid,firstname,lastname) values (%s,%s)", (cId, fName,lName))
                     conn.commit()
             else:
-                cId = getMaxID(conn,'customer','customerid')+1 
+                cId = self.getMaxID(conn,'customer','customerid')+1 
                 myCursor.execute("Insert into Customer (customerid,firstname,lastname) values (%s,%s)", (cId, fName,lName))
                 conn.commit()
         except KeyboardInterrupt:     
@@ -223,7 +224,7 @@ class Connection:
             myCursor.execute("insert into inventory (inventoryId, saleprice, category, modelname, quantity) values (%s, %s, %s, %s, %s)", (invId, price, category, name, quantity))
             conn.commit()
             print("Model successfully added!")
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def updateModel(self, conn):
@@ -244,7 +245,7 @@ class Connection:
 
                 except:
                     print("Error: model number not found")
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def deleteModel(self,conn):
@@ -277,7 +278,7 @@ class Connection:
             for i in range(len(allMod)):
                 table.add_row([allMod[i][0], allMod[i][1], allMod[i][2], allMod[i][3]])
             print(table)
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -316,23 +317,24 @@ class Connection:
                 except(Exception, psycopg2.Error) as error:
                     print(error)
                     invalid=True
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
                 
     def updateDesign(self,conn):
+        myCursor=conn.cursor()
         try:
             invalidDesign = True
-            while(invalidemp):
+            while(invalidDesign):
                 designUp = input("What design are you updating: ")
                 try:
-                    designCheck = myCursor.execute("Select designrev from design where designid = %s", designUp)
+                    designCheck = myCursor.execute("Select designrev from design where designid = %s", (designUp, ))
                     conn.commit()
                     invalidDesign = False
                 except(Exception, psycopg2.Error) as error:
                     print(error)           
             return
             
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
         return
     
@@ -345,7 +347,7 @@ class Connection:
                 for i in range(len(allDes)):
                     table.add_row([allDes[i][0], allDes[i][1], allDes[i][2]])
                 print(table)
-            except KeyboardInterrupt:     
+            except (KeyboardInterrupt,psycopg2.Error):     
                 self.loginOut(conn)        
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -376,7 +378,7 @@ class Connection:
             return
         except(KeyboardInterrupt, Exception, psycopg2.Error) as error:
             print(error)     
-            classConnect.loginOut(conn)
+            self.loginOut(conn)
 
     def updateEmployee(self,conn):
         try:
@@ -475,7 +477,7 @@ class Connection:
             myCursor.execute(sql)
             conn.commit()
             return
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def createCustomerPrediction(self, conn): #Neeeds testing
@@ -486,7 +488,7 @@ class Connection:
             myCursor.execute(sql)
             conn.commit()
             return
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def createOrderInentory(self, conn): #Neeeds testing
@@ -497,7 +499,7 @@ class Connection:
             myCursor.execute(sql)
             conn.commit()
             return
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def viewExpenseReport(self, conn): #Neeeds testing
@@ -525,7 +527,7 @@ class Connection:
 
             print("Total cost of expenses $%s" % (salaryCost+modelCost+hourlyCost))
             return
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def viewTotalRevenue(self,conn): #Neeeds testing
@@ -538,7 +540,7 @@ class Connection:
             for i in range(len(allRev)):
                 table.add_row([allRev[i][0], allRev[i][1], allRev[i][2]])
             print(table)
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def viewCustomerPrediction(self,conn): #Neeeds testing
@@ -567,29 +569,9 @@ class Connection:
             for i in range(len(ordInv)):
                 table.add_row([ordInv[i][0], ordInv[i][1], ordInv[i][2]])
             print(table)
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
-    def newTable(self,conn): #checked with Ola likely not needed
-        myCursor = conn.cursor()
-        return
-    def updateModel(self, conn):
-        myCursor = conn.cursor()
-        invalid=True
-        while(invalid):
-            try:
-                id=input("Please enter the model number of the model: ")
-                myCursor.execute("Select modelNumber from model where modelNumber='%s'", (id, ))
-                newCost=input("Please enter the new cost of the model: ") #error checking
-                newLead=input("Please enter the new lead time: ")
-                newDesign=input("Please enter the new designId: ")
-                sql="UPDATE model SET costmodel=%s, designId=%s, leadtime=%s, WHERE modelname=%s"
-                myCursor.execute(sql, (newCost, newDesign, newLead, id, ))
-                myCursor.commit() #should include after all executions
-                invalid=False
-
-            except:
-                print("Error: model number not found")
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -709,7 +691,7 @@ class Connection:
             for i in range(len(allInv)):
                 table.add_row([allInv[i][0], allInv[i][1], allInv[i][2], allInv[i][3], allInv[i][4]])
             print(table)
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def updateInventory(self,conn):
@@ -743,7 +725,7 @@ class Connection:
                     tryAgain = input("Invalid input. Would you like to try again? (Y/N)")
                     if tryAgain != "Y":
                         return
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
 
@@ -764,9 +746,9 @@ class Connection:
     def createOrder(self,conn):
         try:
             myCursor = conn.cursor()
-            ordernumber = getMaxID(conn,'order','ordernumber')+1
-            custumerid = input("Enter the custumers ID number: ")
-            custIdCheck = myCursor.execute("select custumerid from customer where customerid = %s",custumerid)
+            ordernumber = self.getMaxID(conn,'order','ordernumber')+1
+            customerid = input("Enter the custumers ID number: ")
+            custIdCheck = myCursor.execute("select custumerid from customer where customerid = %s",customerid)
             custvals = myCursor.fetchall()
             if custvals:
                 employeeid = input("Enter your employee ID number: ") 
@@ -776,13 +758,13 @@ class Connection:
                 if checkInventory > 0:
                     myCursor.execute("select saleprice from inventory where inventoryid = %s",inventoryid)
                     saleprice = myCursor.fetchone()[0]
-                    myCursor.execute("Insert into orders (ordernumber,customerid,employeeid,saleprice,inventoryid) values (%s,%s,%s,%s,%s)", (ordernumber, customerid, employeeid, saleprice, inventoryId))
+                    myCursor.execute("Insert into orders (ordernumber,customerid,employeeid,saleprice,inventoryid) values (%s,%s,%s,%s,%s)", (ordernumber, customerid, employeeid, saleprice, inventoryid))
                     conn.commit()
                     myCursor.execute("Update inventory set inventory = %s where inventoryid = %s",
                                     (checkInventory-1,inventoryid))
                     conn.commit()
             return
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
     def updateOrder(self,conn):
         try:
@@ -815,7 +797,7 @@ class Connection:
                     tryAgain = input("Order doesn't exit. Would you like to try another order number? (Y/N)")
                     if tryAgain != "Y":
                         return
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def deleteOrder(self,conn):
@@ -835,7 +817,7 @@ class Connection:
             myCursor.execute("delete from orders where ordernumber = %s", ordNum)
             print("Order number %s has been deleted", ordNum)
             conn.commit()
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
     def viewOrders(self,conn):
@@ -847,7 +829,7 @@ class Connection:
             for i in range(len(orders)):
                 table.add_row([orders[i][0], orders[i][1], orders[i][2], orders[i][3], orders[i][4]])
             print(table)
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
 
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -870,7 +852,7 @@ class Connection:
             if maxID:
                 return maxID[0]
             return 1
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
     
  
@@ -894,5 +876,5 @@ class Connection:
 
 
             conn.commit()
-        except KeyboardInterrupt:     
+        except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)

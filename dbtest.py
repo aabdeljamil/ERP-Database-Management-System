@@ -2,7 +2,6 @@ import psycopg2
 import classwork
 
 def mainMenu():
-
             try:
                   print("Welcome to the ERP DBMS!\n\nMain Menu\n")
                   username = input("Please enter your username: ")
@@ -93,7 +92,7 @@ def admin_menu(classConnect, conn,employeeid):
                                                       classConnect.createTotalRevenue(conn)
                                                 elif option2=='2':
                                                       invalid2 = False
-                                                      classConnnect.createCustomerPrediction(conn)
+                                                      classConnect.createCustomerPrediction(conn)
                                                 elif option2=='3':
                                                       invalid2 = False
                                                       classConnect.createOrderInventory(conn)
@@ -171,7 +170,7 @@ def engineer_menu(classConnect, conn,employeeid):
                                           valid_input = False
                                           break
                                     else:
-                                          print("Please choose a valid option \n")
+                                          valid_input1 = False
                         if option == "2":
                               valid_input = True
                               print("\nSelect an option (number): \n")
