@@ -34,7 +34,6 @@ class Connection:
             return
     
     def loginOut(self,conn):
-        print(conn)
         myCursor = conn.cursor()
         outdate = datetime.datetime.now().date()
         outtime = datetime.datetime.now().time()
