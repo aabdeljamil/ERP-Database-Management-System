@@ -91,32 +91,35 @@ class Connection:
         except KeyboardInterrupt:     
             self.loginOut(conn)
 
-    def updateUser(self,conn): #updated so no recursive calls
+    def updateUser(self,conn):
+        valid=False
         try:
             myCursor = conn.cursor()
-            usrName = input("Enter a username you want to update: ")
-            newPasword = input("Enter a password: ")
-            confnewPassword = input("Confirm the password")
-            invalid=True
-            if newPasword == confnewPassword:
-                while(invalid):
+            while(valid !=True):
+                usrName = input("Enter a username you want to update: ")
+                newPasword = input("Enter a password: ")
+                confnewPassword = input("Confirm the password: ")
+                
+                if newPasword == confnewPassword:                        
                     try:
-                        myCursor.execute("Alter user %s with password %s", (usrName,newPasword))
+                        myCursor.execute("Alter user %s with password %s", (AsIs(usrName),newPasword))
                         conn.commit()
                         userType = input("What type of user is this user: ")
-                        myCursor.execute("Grant %s privileges on database %s to %s", (userType,self.database,usrName))
+                        myCursor.execute("Grant %s on %s to %s", (AsIs(userType),self.database,AsIs(usrName)))
                         conn.commit()
                         print("New User has been added")
-                        invalid=False
+                        valid=True
                     except(Exception,psycopg2.Error) as error:
+                        valid=False
                         if error == 42704:
                             print("User does not exit")
                         else:
-                            print("Error %s occured", error)
-                        return -1    
-            else:
-                print("Password did not match")
-            return
+                            print("Error %s" % error)
+                            
+                else:
+                    print("Password did not match")
+                    valid=False
+                
         except KeyboardInterrupt:     
             self.loginOut(conn)
 
@@ -233,8 +236,8 @@ class Connection:
             invalid=True
             while(invalid):
                 try:
-                    id=input("Please enter the model number of the model: ")
-                    myCursor.execute("Select modelNumber from model where modelNumber='%s'", (id, ))
+                    id=input("Please enter the name of the model: ")
+                    myCursor.execute("Select modelname from model where modelname=%s", (id, ))
                     newCost=input("Please enter the new cost of the model: ") #error checking
                     newLead=input("Please enter the new lead time: ")
                     newDesign=input("Please enter the new designId: ")
