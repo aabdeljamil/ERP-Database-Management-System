@@ -40,7 +40,7 @@ class Connection:
         myCursor.execute("update login set (logouttime,logoutdate)=(%s,%s) where loginid = %s",(outtime,outdate,self.loginid))
         conn.commit()
         conn.close()
-        print("PostgeSQL connection is closed")
+        print("PostgeSQL connection is closed.")
         return
 
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -86,7 +86,7 @@ class Connection:
                             conn.commit()
                 else:
                     print("Passwords do not match, please try again")
-            return
+            print("User created successfully!")
         except KeyboardInterrupt:     
             self.loginOut(conn)
 
@@ -114,11 +114,10 @@ class Connection:
                             print("User does not exit")
                         else:
                             print("Error %s" % error)
-                            
                 else:
                     print("Password did not match")
                     valid=False
-                
+                print("User updated successfully!")
         except KeyboardInterrupt:     
             self.loginOut(conn)
 
@@ -145,14 +144,17 @@ class Connection:
             duplicateName = myCursor.fetchall() #if this list is empty then the customer has not been added yet
             if duplicateName:
                 ques = input("Customer with that name already exists. Is this a different customer with the same name? (Y/N)")
-                if ques == "Y":
+                if ques.lower() == "y":
                     cId = self.getMaxID(conn,'customer','customerid')+1
-                    myCursor.execute("Insert into Customer (customerid,firstname,lastname) values (%s,%s)", (cId, fName,lName))
+                    myCursor.execute("Insert into Customer (customerid,firstname,lastname) values (%s,%s,%s)", (cId, fName,lName))
                     conn.commit()
+                else:
+                    print("Exiting...")
             else:
                 cId = self.getMaxID(conn,'customer','customerid')+1 
-                myCursor.execute("Insert into Customer (customerid,firstname,lastname) values (%s,%s)", (cId, fName,lName))
+                myCursor.execute("Insert into Customer (customerid,firstname,lastname) values (%s,%s,%s)", (cId, fName,lName))
                 conn.commit()
+            print("Customer created successfully!")
         except KeyboardInterrupt:     
             self.loginOut(conn)
     def updateCustomer(self,conn):
@@ -167,12 +169,24 @@ class Connection:
                     invalid = False
                 else:
                     tryAgain = input("Customer ID does not exist. Would you like to try another ID? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":                        
                         return
             fName = input("\nEnter new First Name: ")
             lName = input("\nEnter new Last Name: ")
-            myCursor.execute("update Customer set firstName = %s, lastName = %s where customerId = %s", (fName, lName, confirmCId))
+            myCursor.execute("select * from customer where firstName = %s and lastName = %s", (fName, lName))
             conn.commit()
+            duplicateName = myCursor.fetchall() #if this list is empty then the customer has not been added yet
+            if duplicateName:
+                ques = input("Customer with that name already exists. Is this a different customer with the same name? (Y/N)")
+                if ques.lower() == "y":
+                    myCursor.execute("update Customer set firstName = %s, lastName = %s where customerId = %s", (fName, lName, confirmCId))
+                    conn.commit()
+                else:
+                    print("Exiting...")
+            else:
+                myCursor.execute("update Customer set firstName = %s, lastName = %s where customerId = %s", (fName, lName, confirmCId))
+                conn.commit()
+            print("Customer updated successfully!")
         except KeyboardInterrupt:     
             self.loginOut(conn)
     def viewCustomers(self,conn):
@@ -212,7 +226,7 @@ class Connection:
                     invalid = False
                 else:
                     tryAgain = input("Invalid design ID. Would you like to try another design ID? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":
                         return
             name = input("Please enter a name for this model: ")#needs error checking
             cost = input("Please enter how much this item cost to manufacture: ")
@@ -263,7 +277,7 @@ class Connection:
                     invalid = False
                 else:
                     tryAgain = input("Model doesn't exist. Would you like to try again? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":
                         return
             myCursor.execute("delete from model where designid = %s and modelname = %s", (desId, delModel))
             print("Model %s has been deleted", (delModel))
@@ -395,7 +409,7 @@ class Connection:
                     invalid = False
                 else:
                     tryAgain = input("Invalid employee ID. Would you like to try another ID? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":
                         return
             change = input("Select an option (number):\n1. Change name\n2. Change pay type\
                             \n3. Change job type\n4. Change salary: ")
@@ -629,7 +643,7 @@ class Connection:
                         if invalid1 == True:
                             print(correctCol)
                             tryAgain = input("Column doesn't exist. Would you like to try another name? (Y/N)")
-                            if tryAgain != "Y":
+                            if tryAgain.lower() != "y":
                                 return
                     newCol = input("Please enter the new column name: ")
                     myCursor.execute("alter table %s rename column %s to %s", (AsIs(correctTable), AsIs(correctCol), AsIs(newCol)))
@@ -643,7 +657,7 @@ class Connection:
                             invalid1 = False
                         else:
                             tryAgain = input("Column already exists. Would you like to try another name? (Y/N)")
-                            if tryAgain != "Y":
+                            if tryAgain.lower() != "y":
                                 return
                     print("Please choose the data type (number):\n1. String\n2. Int")
                     prompt = input("Please select and option:")
@@ -661,12 +675,12 @@ class Connection:
                             invalid1 = False
                         else:
                             tryAgain = input("Column doesn't exist. Would you like to try another name? (Y/N)")
-                            if tryAgain != "Y":
+                            if tryAgain.lower() != "y":
                                 return
                     myCursor.execute("alter table %s drop column %s", (tblName, col))
                 else:
                     tryAgain = input("Invalid input. Would you like to try again? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":
                         return
         except KeyboardInterrupt:     
             self.loginOut(conn)
@@ -725,7 +739,7 @@ class Connection:
                         return
                 else:
                     tryAgain = input("Invalid input. Would you like to try again? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":
                         return
         except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
@@ -797,7 +811,7 @@ class Connection:
                         conn.commit()
                 else:
                     tryAgain = input("Order doesn't exit. Would you like to try another order number? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":
                         return
         except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
@@ -814,7 +828,7 @@ class Connection:
                     invalid = False
                 else:
                     tryAgain = input("Order doesn't exist. Would you like to try again? (Y/N)")
-                    if tryAgain != "Y":
+                    if tryAgain.lower() != "y":
                         return
             myCursor.execute("delete from orders where ordernumber = %s", ordNum)
             print("Order number %s has been deleted", ordNum)
