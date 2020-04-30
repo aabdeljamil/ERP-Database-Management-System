@@ -86,7 +86,6 @@ class Connection:
                             conn.commit()
                 else:
                     print("Passwords do not match, please try again")
-            print("User created successfully!")
         except KeyboardInterrupt:     
             self.loginOut(conn)
 
@@ -106,18 +105,17 @@ class Connection:
                         userType = input("What type of user is this user: ")
                         myCursor.execute("Grant %s on %s to %s", (AsIs(userType),self.database,AsIs(usrName)))
                         conn.commit()
-                        print("New User has been added")
+                        print("User updated successfully.")
                         valid=True
                     except(Exception,psycopg2.Error) as error:
                         valid=False
                         if error == 42704:
-                            print("User does not exit")
+                            print("User does not exist")
                         else:
                             print("Error %s" % error)
                 else:
                     print("Password did not match")
                     valid=False
-                print("User updated successfully!")
         except KeyboardInterrupt:     
             self.loginOut(conn)
 
@@ -784,16 +782,15 @@ class Connection:
             self.loginOut(conn)
     def updateOrder(self,conn):
         try:
-
             invalid = True
             while invalid == True:
                 myCursor = conn.cursor()
                 orderid = input("What is your order number: ")
-                checkOrder = myCursor.execute("select ordernumber from orders where ordernumber = %s", orderid)
-                checkOrderId = str(myCursor.fetchone()[0])
-                if orderid == checkOrderId:
+                myCursor.execute("select ordernumber from orders where ordernumber = %s", orderid)
+                checkOrderId = myCursor.fetchall()
+                if checkOrderId:
                     invalid = False
-                    newInventoryId = input("What inventory ID would you like to change your order to: ")
+                    newInventoryId = input("What is the inventory ID of the new model you would like to change your order to: ")
                     myCursor.execute("select inventoryid from orders where ordernumber = %s", orderid)
                     oldInventoryId = str(myCursor.fetchone()[0])
                     myCursor.execute("select quantity from inventory where inventoryid = %s", oldInventoryId)
@@ -809,9 +806,11 @@ class Connection:
                         conn.commit()
                         myCursor.execute("update orders set inventoryid = %s, saleprice=%s where ordernumber = %s", (newInventoryId,saleprice,orderid))
                         conn.commit()
+                        print("Order updated successfully.")
                 else:
-                    tryAgain = input("Order doesn't exit. Would you like to try another order number? (Y/N)")
+                    tryAgain = input("Order doesn't exist. Would you like to try another order number? (Y/N)")
                     if tryAgain.lower() != "y":
+                        print("Exiting...")
                         return
         except (KeyboardInterrupt,psycopg2.Error):     
             self.loginOut(conn)
