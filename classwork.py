@@ -9,7 +9,7 @@ from prettytable import PrettyTable
 class Connection:
     def __init__(self):
         self.host = "127.0.0.1"
-        self.port = "8081"
+        self.port = "8080"
         self.database = "postgres"
         self.loginid = 0
 
@@ -442,7 +442,6 @@ class Connection:
 
     def employeeInfo(self,conn,jobtype):
         try:
-            print("in here")
             myCursor = conn.cursor()
             if jobtype == "engineer":
                 table = PrettyTable(['Fist Name', 'Last Name', 'Job Type'])
@@ -698,7 +697,7 @@ class Connection:
     #Inventory function calls
     def viewInventory(self,conn):
         try:
-            table = PrettyTable(['Inventory ID' 'Sale Price' 'Category' 'Model Name' 'Quantity'])
+            table = PrettyTable(['Inventory ID', 'Sale Price', 'Category', 'Model Name', 'Quantity'])
             myCursor = conn.cursor()
             myCursor.execute("select * from Inventory")
             allInv = myCursor.fetchall()
@@ -762,7 +761,7 @@ class Connection:
             myCursor = conn.cursor()
             ordernumber = self.getMaxID(conn,'order','ordernumber')+1
             customerid = input("Enter the custumers ID number: ")
-            custIdCheck = myCursor.execute("select custumerid from customer where customerid = %s",customerid)
+            myCursor.execute("select custumerid from customer where customerid = %s",customerid)
             custvals = myCursor.fetchall()
             if custvals:
                 employeeid = input("Enter your employee ID number: ") 
@@ -786,8 +785,8 @@ class Connection:
             while invalid == True:
                 myCursor = conn.cursor()
                 orderid = input("What is your order number: ")
-                myCursor.execute("select ordernumber from orders where ordernumber = %s", orderid)
-                checkOrderId = myCursor.fetchall()
+                myCursor.execute("select ordernumber from orders where ordernumber = %s", (orderid, ))
+                checkOrderId = myCursor.fetchone()
                 if checkOrderId:
                     invalid = False
                     newInventoryId = input("What is the inventory ID of the new model you would like to change your order to: ")

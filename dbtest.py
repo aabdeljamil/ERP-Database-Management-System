@@ -10,7 +10,7 @@ def mainMenu():
                   conn1 = psycopg2.connect(user = 'idcheck',
                                           password = 'gettheid3',
                                           host = '127.0.0.1',
-                                          port = 8081,
+                                          port = 8080,
                                           database = 'postgres')
                   #call one of the following menus after verifying login info
                   #call permisionCheck() to then call correspodning menu
